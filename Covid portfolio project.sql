@@ -67,6 +67,13 @@ where continent is not null
 --group by date
 order by 1,2
 
+Select location, SUM(new_deaths) as TotalDeathCount
+from project01..coviddeath
+where continent is null
+and location not in ('World', 'European Union', 'International')
+group by location
+order by TotalDeathCount
+
 -- Query using CTE to calculate the rolling sum of new vaccinations per location.
 -- This query enhances readability and manageability by breaking down the calculation into smaller units.
 --They are especially useful when you need to reference the same subquery multiple times within a larger query.
