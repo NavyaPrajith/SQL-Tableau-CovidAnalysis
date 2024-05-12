@@ -1,3 +1,4 @@
+-- Query to retrieve data from coviddeath table, sorted by date and location.
 select * from project01..coviddeath order by 3,5;
 
 --select * from project01..covidvaccinations order by 3;
@@ -6,10 +7,19 @@ select location,date,total_cases,new_cases,total_deaths,population from project0
 
 --Looking at Total Cases vs Total Deaths
 --shows likelihood of dying if you contract covid in your country
-select location,date,total_cases,new_cases,total_deaths,(CONVERT(float, total_deaths) / CONVERT(float, total_cases)) * 100 as DeathPercentage
-from project01..coviddeath 
-where location like'%states%'
-order by 1,2
+select 
+    location,
+    date,
+    total_cases,
+    new_cases,
+    total_deaths,
+    (CONVERT(float, total_deaths) / CONVERT(float, total_cases)) * 100 as DeathPercentage
+from 
+    project01..coviddeath 
+where 
+    location like '%states%'
+order by 
+    location, date;
 
 --looking at total cases vs population
 --shows what percentage of population got covid
@@ -30,6 +40,7 @@ from project01..coviddeath
 where continent is not null
 group by location
 order by TotalDeathCount desc;
+
 --let's break things down by continent
 --Showing continents with the highest death count per population
 select continent,MAX(total_deaths) as TotalDeathCount
@@ -38,7 +49,8 @@ where continent is not null
 group by continent
 order by TotalDeathCount desc;
 
---globalnumbers
+-- Query to calculate total new cases, total new deaths, and new death percentage.
+-- This provides a summary of COVID statistics.
 ALTER TABLE project01..coviddeath
 ALTER COLUMN new_cases FLOAT;
 
@@ -55,9 +67,8 @@ where continent is not null
 --group by date
 order by 1,2
 
---looking at Total Population vs Vaccinations
---use CTE
---Using CTEs can make complex queries more readable and manageable by breaking them down into smaller, logical units. 
+-- Query using CTE to calculate the rolling sum of new vaccinations per location.
+-- This query enhances readability and manageability by breaking down the calculation into smaller units.
 --They are especially useful when you need to reference the same subquery multiple times within a larger query.
 With PopvsVac(continent,location,date,population,new_vaccinations,RollingPeopleVaccinated) as
 (select dea.continent,dea.location,dea.date,dea.population,vac.new_vaccinations
@@ -70,7 +81,7 @@ where dea.continent is not null)
 --order by 2,3
 select * ,(RollingPeopleVaccinated/population)*100 from PopvsVac
 
---Temp table
+-- Creating a temporary table to store data for later use.
 --DROP TABLE if exists #PercentPopulationVaccinated
 Create table #PercentPopulationVaccinated
 (Continent nvarchar(255),
